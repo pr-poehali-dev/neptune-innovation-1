@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Menu, X } from "lucide-react"
+import Icon from "@/components/ui/icon"
 
 interface NavbarProps {
   onOpenOrder?: () => void
@@ -49,7 +49,7 @@ export function Navbar({ onOpenOrder }: NavbarProps) {
               onClick={() => setIsOpen(!isOpen)}
               className="text-white hover:text-red-500 transition-colors duration-200"
             >
-              {isOpen ? <X size={24} /> : <Menu size={24} />}
+              {isOpen ? <Icon name="X" size={24} /> : <Icon name="Menu" size={24} />}
             </button>
           </div>
         </div>
