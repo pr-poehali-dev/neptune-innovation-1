@@ -3,51 +3,51 @@ import { Badge } from "@/components/ui/badge"
 
 const features = [
   {
-    title: "Адаптивная нейрообработка",
-    description: "Самооптимизирующиеся алгоритмы, которые обучаются на нейронных паттернах и улучшают интерпретацию сигналов.",
-    icon: "brain",
-    badge: "ИИ",
+    title: "Персональный план тренировок",
+    description: "ИИ составляет программу тренировок под твои параметры: рост, вес, уровень подготовки и цель — сила, рельеф или выносливость.",
+    icon: "dumbbell",
+    badge: "Тренировки",
   },
   {
-    title: "Медицинская защита",
-    description: "Шифрование по стандартам FDA со сквозной защитой конфиденциальных нейронных данных.",
-    icon: "lock",
-    badge: "Сертификат",
+    title: "План питания под тебя",
+    description: "Рацион с точным КБЖУ, учитывающий твой образ жизни, предпочтения и метаболизм. Никаких жёстких диет — только результат.",
+    icon: "salad",
+    badge: "Питание",
   },
   {
-    title: "Интуитивное управление",
-    description: "Естественная трансляция мыслей в действия с откликом менее миллисекунды и точностью 99,7%.",
-    icon: "globe",
-    badge: "Точность",
+    title: "Подбор добавок",
+    description: "Персональная схема спортивного питания: протеин, витамины, жиросжигатели — только то, что реально нужно твоему телу.",
+    icon: "pill",
+    badge: "Добавки",
   },
   {
-    title: "Предиктивная калибровка",
-    description: "ML-модели, которые предугадывают намерения пользователя и оптимизируют нейронные пути.",
+    title: "Анализ параметров тела",
+    description: "Вводишь вес, рост, возраст и образ жизни — система рассчитывает твою точку старта и строит маршрут к цели.",
+    icon: "chart",
+    badge: "ИИ-анализ",
+  },
+  {
+    title: "Прогресс и обновления",
+    description: "Планы обновляются по мере твоего прогресса. Тело меняется — программа адаптируется автоматически.",
     icon: "zap",
-    badge: "Умный",
+    badge: "Адаптивно",
   },
   {
-    title: "Биометрическая интеграция",
-    description: "Бесшовная синхронизация с мониторингом жизненных показателей для контроля здоровья.",
-    icon: "link",
-    badge: "Связь",
-  },
-  {
-    title: "Поддержка XR",
-    description: "Нативная совместимость с AR/VR-средами для терапевтических и рабочих приложений.",
-    icon: "target",
-    badge: "XR Ready",
+    title: "Быстрый старт",
+    description: "Заполни анкету за 3 минуты и получи готовый план уже сегодня. Без долгих консультаций и ожидания.",
+    icon: "rocket",
+    badge: "Быстро",
   },
 ]
 
 export function FeaturesSection() {
   return (
-    <section className="py-24 px-6 bg-background">
+    <section id="features" className="py-24 px-6 bg-background">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-16">
-          <h2 className="text-4xl font-bold text-foreground mb-4 font-sans">Возможности нового поколения</h2>
+          <h2 className="text-4xl font-bold text-foreground mb-4 font-sans">Всё для твоего результата</h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-            Почувствуйте будущее с технологиями, которые переопределяют возможное
+            Персональные планы на основе твоих данных — тренировки, питание и добавки в одном месте
           </p>
         </div>
 
@@ -61,12 +61,12 @@ export function FeaturesSection() {
               <CardHeader>
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-3xl">
-                    {feature.icon === "brain" && "&#129504;"}
-                    {feature.icon === "lock" && "&#128274;"}
-                    {feature.icon === "globe" && "&#127760;"}
-                    {feature.icon === "zap" && "&#9889;"}
-                    {feature.icon === "link" && "&#128279;"}
-                    {feature.icon === "target" && "&#127919;"}
+                    {feature.icon === "dumbbell" && "🏋️"}
+                    {feature.icon === "salad" && "🥗"}
+                    {feature.icon === "pill" && "💊"}
+                    {feature.icon === "chart" && "📊"}
+                    {feature.icon === "zap" && "⚡"}
+                    {feature.icon === "rocket" && "🚀"}
                   </span>
                   <Badge variant="secondary" className="bg-accent text-accent-foreground">
                     {feature.badge}

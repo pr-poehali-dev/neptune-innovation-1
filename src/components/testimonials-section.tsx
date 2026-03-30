@@ -3,25 +3,25 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 const testimonials = [
   {
-    name: "Елена Родригес",
-    role: "Директор по нейронауке, Quantum Dynamics",
-    avatar: "/professional-woman-scientist.png",
-    content:
-      "SynapseAI изменил наш подход к нейрореабилитации. Результаты пациентов улучшились на 340% после внедрения.",
-  },
-  {
-    name: "Маркус Уильямс",
-    role: "Руководитель исследований, Stellar Analytics",
+    name: "Артём, 22 года",
+    role: "Минус 8 кг за 6 недель",
     avatar: "/cybersecurity-expert-man.jpg",
     content:
-      "Точность и протоколы безопасности не имеют аналогов. Мы значительно ускорили клинические испытания с платформой SynapseAI.",
+      "Раньше не знал с чего начать. Заполнил анкету — получил план на неделю вперёд. Тренировки, питание, добавки — всё расписано. За 6 недель минус 8 кг и заметный рельеф.",
   },
   {
-    name: "Анна Ковальски",
-    role: "Вице-президент по разработке, Nova Industries",
+    name: "Соня, 19 лет",
+    role: "Набрала 4 кг мышц за 2 месяца",
     avatar: "/asian-woman-tech-developer.jpg",
     content:
-      "Интеграция прошла безупречно. Адаптивные алгоритмы понимают намерения пользователя лучше любой системы, что мы тестировали.",
+      "Хотела набрать массу, но не знала что есть и как тренироваться. FitCore AI дал точный план под мои параметры. Два месяца — и результат налицо. Очень круто!",
+  },
+  {
+    name: "Дима, 25 лет",
+    role: "Похудел на 12 кг, держит форму",
+    avatar: "/professional-woman-scientist.png",
+    content:
+      "Пробовал разные диеты — ничего не держалось. Здесь всё по-другому: план адаптируется к моему прогрессу, и я не срываюсь. Минус 12 кг за 3 месяца — реальный результат.",
   },
 ]
 
@@ -30,9 +30,9 @@ export function TestimonialsSection() {
     <section className="py-24 px-6 bg-card">
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-16">
-          <h2 className="text-4xl font-bold text-card-foreground mb-4 font-sans">Нам доверяют лидеры</h2>
+          <h2 className="text-4xl font-bold text-card-foreground mb-4 font-sans">Реальные результаты</h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-            Что говорят лидеры индустрии о нашей революционной технологии
+            Молодёжь, которая уже изменила своё тело с персональными планами FitCore AI
           </p>
         </div>
 
