@@ -1,5 +1,5 @@
 """
-Обработка заявок: создание, проверка оплаты, подтверждение тренером, чат, email через Resend.
+Обработка заявок: создание, проверка оплаты, подтверждение тренером, чат, уведомления в Telegram.
 """
 import json
 import os
@@ -241,35 +241,37 @@ def handler(event: dict, context) -> dict:
 
 
 def _send_email(subject: str, html: str):
-    """Отправка через Resend API (без SMTP, только HTTP)"""
-    api_key = os.environ.get("RESEND_API_KEY", "")
-    to_email = "borovovarsenij193@gmail.com"
+    """Отправка уведомления в Telegram"""
+    token = os.environ.get("TELEGRAM_BOT_TOKEN", "")
+    chat_id = os.environ.get("TELEGRAM_CHAT_ID", "")
 
-    if not api_key:
-        print(f"[EMAIL SKIP] RESEND_API_KEY не задан. Тема: {subject}")
+    if not token or not chat_id:
+        print(f"[TG SKIP] Токен или chat_id не заданы. Тема: {subject}")
         return
 
+    # Конвертируем HTML в простой текст для Telegram
+    import re
+    text = re.sub(r"<[^>]+>", "", html)
+    text = re.sub(r"\n{3,}", "\n\n", text).strip()
+    message = f"*{subject}*\n\n{text}"
+
     payload = json.dumps({
-        "from": "Форма Жизни <onboarding@resend.dev>",
-        "to": [to_email],
-        "subject": subject,
-        "html": html,
+        "chat_id": chat_id,
+        "text": message,
+        "parse_mode": "Markdown",
     }).encode("utf-8")
 
     req = urllib.request.Request(
-        "https://api.resend.com/emails",
+        f"https://api.telegram.org/bot{token}/sendMessage",
         data=payload,
-        headers={
-            "Authorization": f"Bearer {api_key}",
-            "Content-Type": "application/json",
-        },
+        headers={"Content-Type": "application/json"},
         method="POST",
     )
 
     try:
         with urllib.request.urlopen(req) as resp:
-            print(f"[EMAIL OK] {subject} → {to_email} (status {resp.status})")
+            print(f"[TG OK] Уведомление отправлено: {subject}")
     except urllib.error.HTTPError as e:
-        print(f"[EMAIL ERROR] {e.code}: {e.read().decode()}")
+        print(f"[TG ERROR] {e.code}: {e.read().decode()}")
     except Exception as e:
-        print(f"[EMAIL ERROR] {e}")
+        print(f"[TG ERROR] {e}")
