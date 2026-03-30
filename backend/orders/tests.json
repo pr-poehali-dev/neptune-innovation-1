@@ -1,0 +1,32 @@
+{
+  "tests": [
+    {
+      "name": "Create order",
+      "method": "POST",
+      "path": "/?action=create",
+      "body": {
+        "name": "Тест Тестов",
+        "phone": "+79001234567",
+        "email": "test@test.com",
+        "age": 22,
+        "height": 180,
+        "weight": 75.5,
+        "activity_level": "low",
+        "goal": "weight_loss",
+        "equipment": "gym",
+        "notes": ""
+      },
+      "expectedStatus": 200,
+      "expectedBody": {"order_id": 0},
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Get admin orders",
+      "method": "GET",
+      "path": "/?action=admin",
+      "expectedStatus": 200,
+      "expectedBody": {"orders": []},
+      "bodyMatcher": "partial"
+    }
+  ]
+}

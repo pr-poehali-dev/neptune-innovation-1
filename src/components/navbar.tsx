@@ -2,7 +2,11 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Menu, X } from "lucide-react"
 
-export function Navbar() {
+interface NavbarProps {
+  onOpenOrder?: () => void
+}
+
+export function Navbar({ onOpenOrder }: NavbarProps) {
   const [isOpen, setIsOpen] = useState(false)
 
   return (
@@ -12,7 +16,7 @@ export function Navbar() {
           {/* Logo */}
           <div className="flex-shrink-0">
             <h1 className="font-orbitron text-xl font-bold text-white">
-              FitCore<span className="text-red-500">AI</span>
+              Форма<span className="text-red-500"> Жизни</span>
             </h1>
           </div>
 
@@ -36,7 +40,7 @@ export function Navbar() {
 
           {/* CTA Button */}
           <div className="hidden md:block">
-            <Button className="bg-red-500 hover:bg-red-600 text-white font-geist border-0">Получить план</Button>
+            <Button onClick={onOpenOrder} className="bg-red-500 hover:bg-red-600 text-white font-geist border-0">Получить план</Button>
           </div>
 
           {/* Mobile menu button */}
@@ -76,7 +80,7 @@ export function Navbar() {
                 Вопросы
               </a>
               <div className="px-3 py-2">
-                <Button className="w-full bg-red-500 hover:bg-red-600 text-white font-geist border-0">
+                <Button onClick={onOpenOrder} className="w-full bg-red-500 hover:bg-red-600 text-white font-geist border-0">
                   Получить план
                 </Button>
               </div>
