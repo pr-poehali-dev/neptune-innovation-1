@@ -1,12 +1,11 @@
 """
-Обработка заявок: создание, проверка оплаты, подтверждение тренером, чат, email-уведомления.
+Обработка заявок: создание, проверка оплаты, подтверждение тренером, чат, email через Resend.
 """
 import json
 import os
-import smtplib
+import urllib.request
+import urllib.error
 import psycopg2
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
 
 
 def get_conn():
@@ -58,24 +57,23 @@ def handler(event: dict, context) -> dict:
         cur.close()
         conn.close()
 
-        # Уведомление тренеру о новой заявке
         _send_email(
-            subject=f"Новая заявка #{order_id} — Форма Жизни",
-            body=f"""Новая заявка на сайте!
-
-Заявка #{order_id}
-Имя: {body.get('name', '')}
-Телефон: {body.get('phone', '')}
-Email: {body.get('email', '')}
-Возраст: {body.get('age')} лет
-Рост: {body.get('height')} см
-Вес: {body.get('weight')} кг
-Активность: {body.get('activity_level', '')}
-Цель: {body.get('goal', '')}
-Инвентарь: {body.get('equipment', '')}
-Примечания: {body.get('notes', '')}
-
-Ожидает оплаты. Проверь и подтверди в панели тренера."""
+            subject=f"📋 Новая заявка #{order_id} — Форма Жизни",
+            html=f"""
+<h2>Новая заявка #{order_id}</h2>
+<table style="border-collapse:collapse;width:100%">
+  <tr><td style="padding:6px;color:#888">Имя</td><td style="padding:6px;font-weight:bold">{body.get('name','')}</td></tr>
+  <tr><td style="padding:6px;color:#888">Телефон</td><td style="padding:6px;font-weight:bold">{body.get('phone','')}</td></tr>
+  <tr><td style="padding:6px;color:#888">Email</td><td style="padding:6px">{body.get('email','')}</td></tr>
+  <tr><td style="padding:6px;color:#888">Возраст</td><td style="padding:6px">{body.get('age')} лет</td></tr>
+  <tr><td style="padding:6px;color:#888">Рост / Вес</td><td style="padding:6px">{body.get('height')} см / {body.get('weight')} кг</td></tr>
+  <tr><td style="padding:6px;color:#888">Активность</td><td style="padding:6px">{body.get('activity_level','')}</td></tr>
+  <tr><td style="padding:6px;color:#888">Цель</td><td style="padding:6px">{body.get('goal','')}</td></tr>
+  <tr><td style="padding:6px;color:#888">Инвентарь</td><td style="padding:6px">{body.get('equipment','')}</td></tr>
+  <tr><td style="padding:6px;color:#888">Примечания</td><td style="padding:6px">{body.get('notes','')}</td></tr>
+</table>
+<p style="color:#888;margin-top:16px">Статус: ожидает оплаты</p>
+"""
         )
 
         return {
@@ -84,7 +82,7 @@ Email: {body.get('email', '')}
             "body": json.dumps({"order_id": order_id}),
         }
 
-    # POST ?action=claim_paid — клиент нажал "я оплатил", меняем статус на awaiting_confirm
+    # POST ?action=claim_paid — клиент нажал "я оплатил"
     if method == "POST" and action == "claim_paid":
         order_id = body.get("order_id")
         conn = get_conn()
@@ -99,18 +97,19 @@ Email: {body.get('email', '')}
         conn.close()
 
         if row:
-            # Уведомление тренеру — клиент говорит что оплатил
             _send_email(
-                subject=f"Клиент сообщил об оплате — заявка #{order_id}",
-                body=f"""Клиент нажал «Я оплатил»!
-
-Заявка #{order_id}
-Имя: {row[1]}
-Телефон: {row[2]}
-Email: {row[3]}
-Цель: {row[4]}
-
-Проверь поступление 300 руб. в Т-Банке и подтверди заявку в панели тренера."""
+                subject=f"💰 Клиент сообщил об оплате — заявка #{order_id}",
+                html=f"""
+<h2>Клиент нажал «Я оплатил»!</h2>
+<p><b>Заявка #{order_id}</b></p>
+<p>Имя: <b>{row[1]}</b></p>
+<p>Телефон: <b>{row[2]}</b></p>
+<p>Email: {row[3]}</p>
+<p>Цель: {row[4]}</p>
+<hr>
+<p style="color:#e53e3e"><b>Проверь поступление 300 ₽ в Т-Банке.</b><br>
+После проверки подтверди оплату в панели тренера, чтобы открылся чат с клиентом.</p>
+"""
             )
             return {
                 "statusCode": 200,
@@ -118,8 +117,6 @@ Email: {row[3]}
                 "body": json.dumps({"ok": True, "status": "awaiting_confirm"}),
             }
         else:
-            # Заявка уже была обработана или не найдена
-            cur2 = get_conn().cursor()
             conn2 = get_conn()
             cur2 = conn2.cursor()
             cur2.execute("SELECT payment_status FROM orders WHERE id=%s", (order_id,))
@@ -133,7 +130,7 @@ Email: {row[3]}
                 "body": json.dumps({"ok": False, "status": current_status}),
             }
 
-    # GET ?action=check_payment&order_id=X — проверить статус оплаты (полинг с фронта)
+    # GET ?action=check_payment&order_id=X — проверить статус
     if method == "GET" and action == "check_payment":
         order_id = params.get("order_id")
         conn = get_conn()
@@ -149,7 +146,7 @@ Email: {row[3]}
             "body": json.dumps({"status": status}),
         }
 
-    # POST ?action=confirm_payment — тренер подтверждает оплату (из панели)
+    # POST ?action=confirm_payment — тренер подтверждает оплату
     if method == "POST" and action == "confirm_payment":
         order_id = body.get("order_id")
         conn = get_conn()
@@ -174,7 +171,7 @@ Email: {row[3]}
             "body": json.dumps({"ok": True}),
         }
 
-    # GET ?action=chat&order_id=X — получить сообщения чата
+    # GET ?action=chat&order_id=X
     if method == "GET" and action == "chat":
         order_id = params.get("order_id")
         conn = get_conn()
@@ -196,7 +193,7 @@ Email: {row[3]}
             "body": json.dumps({"messages": messages}),
         }
 
-    # POST ?action=send_message — отправить сообщение в чат
+    # POST ?action=send_message
     if method == "POST" and action == "send_message":
         conn = get_conn()
         cur = conn.cursor()
@@ -214,7 +211,7 @@ Email: {row[3]}
             "body": json.dumps({"ok": True, "id": msg_id}),
         }
 
-    # GET ?action=admin — все заявки для менеджера
+    # GET ?action=admin
     if method == "GET" and action == "admin":
         conn = get_conn()
         cur = conn.cursor()
@@ -243,26 +240,36 @@ Email: {row[3]}
     return {"statusCode": 404, "headers": cors, "body": json.dumps({"error": "not found"})}
 
 
-def _send_email(subject: str, body: str):
-    """Отправка email через SMTP mail.ru"""
-    smtp_password = os.environ.get("SMTP_PASSWORD", "")
-    notify_email = os.environ.get("EMAIL_NOTIFY", "tanks.674@mail.ru")
+def _send_email(subject: str, html: str):
+    """Отправка через Resend API (без SMTP, только HTTP)"""
+    api_key = os.environ.get("RESEND_API_KEY", "")
+    to_email = "borovovarsenij193@gmail.com"
 
-    if not smtp_password:
-        print(f"[EMAIL SKIP] SMTP_PASSWORD не задан. Тема: {subject}")
+    if not api_key:
+        print(f"[EMAIL SKIP] RESEND_API_KEY не задан. Тема: {subject}")
         return
 
+    payload = json.dumps({
+        "from": "Форма Жизни <onboarding@resend.dev>",
+        "to": [to_email],
+        "subject": subject,
+        "html": html,
+    }).encode("utf-8")
+
+    req = urllib.request.Request(
+        "https://api.resend.com/emails",
+        data=payload,
+        headers={
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json",
+        },
+        method="POST",
+    )
+
     try:
-        msg = MIMEMultipart()
-        msg["From"] = notify_email
-        msg["To"] = notify_email
-        msg["Subject"] = subject
-        msg.attach(MIMEText(body, "plain", "utf-8"))
-
-        with smtplib.SMTP_SSL("smtp.mail.ru", 465) as server:
-            server.login(notify_email, smtp_password)
-            server.send_message(msg)
-
-        print(f"[EMAIL OK] Отправлено: {subject}")
+        with urllib.request.urlopen(req) as resp:
+            print(f"[EMAIL OK] {subject} → {to_email} (status {resp.status})")
+    except urllib.error.HTTPError as e:
+        print(f"[EMAIL ERROR] {e.code}: {e.read().decode()}")
     except Exception as e:
         print(f"[EMAIL ERROR] {e}")
